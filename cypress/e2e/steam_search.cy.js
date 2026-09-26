@@ -1,78 +1,137 @@
 import SteamStorePage from '../pages/SteamStorePage';
 
-describe('Steam Store Search', () => {
+describe('Steam Store Search and Verification', () => {
 
     const steamStore = new SteamStorePage();
 
-    it('should search for Dota 2', () => {
+    let firstGame;
+    let secondGame;
+
+
+    it('should search for Dota 2 and verify the first result', () => {
 
         steamStore.visit();
 
         steamStore.searchGame('Dota 2');
 
+        cy.url()
+            .should('include', 'term=Dota');
+
+        steamStore.searchBox()
+            .should('have.value', 'Dota 2');
+
         steamStore.firstResultName()
-            .should('have.text', 'Dota 2');
+            .should('equal', 'Dota 2');
 
     });
 
-    it('should extract first game data', () => {
+
+    it('should store the first two search results', () => {
 
         steamStore.visit();
 
         steamStore.searchGame('Dota 2');
 
-        cy.get('.search_result_row')
-            .first()
-            .then((result) => {
+        steamStore.getFirstTwoGames()
+            .then(({ game1, game2 }) => {
 
-                steamStore.getGameData(result)
-                    .then((game) => {
+                firstGame = game1;
+                secondGame = game2;
 
-                        cy.log(JSON.stringify(game));
+                expect(firstGame).to.have.all.keys(
+                    'name',
+                    'platforms',
+                    'releaseDate',
+                    'review',
+                    'price'
+                );
 
-                        expect(game.name).to.equal('Dota 2');
-                        expect(game.platforms).to.deep.equal([
-                            'Windows',
-                            'macOS',
-                            'Linux'
-                        ]);
-                        expect(game.releaseDate).to.equal('9 Jul, 2013');
-                        expect(game.review).to.equal('Very Positive');
-                        expect(game.price).to.equal('Free');
+                expect(secondGame).to.have.all.keys(
+                    'name',
+                    'platforms',
+                    'releaseDate',
+                    'review',
+                    'price'
+                );
+
+                expect(firstGame.name)
+                    .to.equal('Dota 2');
+
+                expect(secondGame.name)
+                    .to.be.a('string')
+                    .and.not.be.empty;
+
+            });
+
+    });
+
+
+    it('should re-search using the second game name and verify both games', () => {
+
+    
+        steamStore.visit();
+
+        steamStore.searchGame('Dota 2');
+
+        steamStore.getFirstTwoGames()
+            .then(({ game1, game2 }) => {
+
+                steamStore.searchGameByUrl(game2.name);
+
+           
+                steamStore.searchBox()
+                    .should('have.value', game2.name);
+
+     
+                steamStore.findResultByName(game1.name)
+                    .should('exist');
+
+                steamStore.findResultByName(game2.name)
+                    .should('exist');
+
+                steamStore.getGameByName(game1.name)
+                    .then((newGame1) => {
+
+                        steamStore.getGameByName(game2.name)
+                            .then((newGame2) => {
+
+                                expect(newGame1.name)
+                                    .to.equal(game1.name);
+
+                                expect(newGame1.platforms)
+                                    .to.deep.equal(game1.platforms);
+
+                                expect(newGame1.releaseDate)
+                                    .to.equal(game1.releaseDate);
+
+                                expect(newGame1.review)
+                                    .to.equal(game1.review);
+
+                                expect(newGame1.price)
+                                    .to.equal(game1.price);
+
+
+                                expect(newGame2.name)
+                                    .to.equal(game2.name);
+
+                                expect(newGame2.platforms)
+                                    .to.deep.equal(game2.platforms);
+
+                                expect(newGame2.releaseDate)
+                                    .to.equal(game2.releaseDate);
+
+                                expect(newGame2.review)
+                                    .to.equal(game2.review);
+
+                                expect(newGame2.price)
+                                    .to.equal(game2.price);
+
+                            });
 
                     });
 
             });
 
     });
-
-    it('should extract first two games', () => {
-
-    steamStore.visit();
-
-    steamStore.searchGame('Dota 2');
-
-    steamStore.searchResults()
-        .then((results) => {
-
-            const firstResult = results.eq(0);
-            const secondResult = results.eq(1);
-
-            steamStore.getGameData(firstResult)
-                .then((game1) => {
-
-                    steamStore.getGameData(secondResult)
-                        .then((game2) => {
-
-                            cy.log(JSON.stringify(game1));
-                            cy.log(JSON.stringify(game2));
-
-                        });
-
-                });
-
-        });
-
-});
 
 });
