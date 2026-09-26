@@ -46,4 +46,33 @@ describe('Steam Store Search', () => {
 
     });
 
+    it('should extract first two games', () => {
+
+    steamStore.visit();
+
+    steamStore.searchGame('Dota 2');
+
+    steamStore.searchResults()
+        .then((results) => {
+
+            const firstResult = results.eq(0);
+            const secondResult = results.eq(1);
+
+            steamStore.getGameData(firstResult)
+                .then((game1) => {
+
+                    steamStore.getGameData(secondResult)
+                        .then((game2) => {
+
+                            cy.log(JSON.stringify(game1));
+                            cy.log(JSON.stringify(game2));
+
+                        });
+
+                });
+
+        });
+
+});
+
 });
