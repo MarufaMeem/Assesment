@@ -1,34 +1,42 @@
 class SteamStorePage {
 
+    // -------------------------
+    // Navigation
+    // -------------------------
 
     visit() {
         cy.visit('/');
     }
 
 
-   
+    // -------------------------
+    // Search
+    // -------------------------
+
     searchBox() {
         return cy.get('input[name="term"]:visible').first();
     }
 
     searchGame(gameName) {
+        // Open the actual Steam search URL.
+        cy.visit(`/search?term=${encodeURIComponent(gameName)}`);
+
+        // Steam does not populate the visible search input after navigation,
+        // so enter the searched term into the visible input.
         this.searchBox()
             .should('be.visible')
             .clear()
-            .type(`${gameName}{enter}`);
+            .type(gameName);
 
-        cy.url().should('include', 'search');
-    }
-
-    searchGameByUrl(gameName) {
-        cy.visit(`/search?term=${encodeURIComponent(gameName)}`);
-
-        cy.url()
-            .should('include', `term=${encodeURIComponent(gameName)}`);
+        this.searchBox()
+            .should('have.value', gameName);
     }
 
 
- 
+    // -------------------------
+    // Search Results
+    // -------------------------
+
     searchResults() {
         return cy.get('.search_result_row');
     }
@@ -45,16 +53,21 @@ class SteamStorePage {
     }
 
 
-   
+    // -------------------------
+    // Extract Game Data
+    // -------------------------
+
     getGameData(result) {
 
         const game = {};
 
+        // Name
         game.name = result
             .find('.search_name .title')
             .text()
             .trim();
 
+        // Platforms
         game.platforms = [];
 
         if (result.find('.platform_img.win').length > 0) {
@@ -69,30 +82,39 @@ class SteamStorePage {
             game.platforms.push('Linux');
         }
 
+        // Release date
         game.releaseDate = result
             .find('.search_released')
             .text()
             .trim();
 
+        // Price
         game.price = result
             .find('.discount_final_price')
             .text()
             .trim();
 
+        // Review
         return cy.wrap(result)
             .find('.search_review_summary')
             .invoke('attr', 'data-tooltip-html')
             .then((reviewText) => {
 
                 game.review = reviewText
-                    .replace(/&lt;br&gt;/g, '<br>')
-                    .split('<br>')[0]
-                    .trim();
+                    ? reviewText
+                        .replace(/&lt;br&gt;/g, '<br>')
+                        .split('<br>')[0]
+                        .trim()
+                    : '';
 
                 return game;
             });
     }
 
+
+    // -------------------------
+    // First Two Games
+    // -------------------------
 
     getFirstTwoGames() {
 
@@ -122,6 +144,9 @@ class SteamStorePage {
     }
 
 
+    // -------------------------
+    // Find Result By Name
+    // -------------------------
 
     findResultByName(gameName) {
 
@@ -138,6 +163,9 @@ class SteamStorePage {
     }
 
 
+    // -------------------------
+    // Get Game By Name
+    // -------------------------
 
     getGameByName(gameName) {
 
