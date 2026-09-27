@@ -1,7 +1,7 @@
 {
-  "name": "misl-sqa-assignment",
+  "name": "sqa-assignment",
   "version": "1.0.0",
-  "description": "Cypress SQA automation assignment for MISL",
+  "description": "Cypress SQA automation assignment",
   "scripts": {
     "cy:open": "cypress open",
     "cy:run": "cypress run"
