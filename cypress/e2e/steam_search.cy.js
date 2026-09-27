@@ -5,27 +5,42 @@ describe("Steam Store Search and Verification", () => {
     const steamStore = new SteamStorePage();
 
 
+   
     it("should search for Dota 2 and verify the first result", () => {
 
         steamStore.visit();
 
         steamStore.searchGame("Dota 2");
 
+
+      
+        cy.url().should("include", "/search");
+        cy.url().should("include", "term=Dota");
+
+
+        steamStore.searchBox()
+            .should("be.visible")
+            .and("have.value", "Dota 2");
+
+
+       
         steamStore.firstResultName()
             .should("equal", "Dota 2");
-
     });
 
 
+  
     it("should store the first two search results", () => {
 
         steamStore.visit();
 
         steamStore.searchGame("Dota 2");
 
+
         steamStore.getFirstTwoGames()
             .then(({ game1, game2 }) => {
 
+              
                 expect(game1).to.have.all.keys(
                     "name",
                     "platforms",
@@ -34,6 +49,8 @@ describe("Steam Store Search and Verification", () => {
                     "price"
                 );
 
+
+               
                 expect(game2).to.have.all.keys(
                     "name",
                     "platforms",
@@ -42,18 +59,22 @@ describe("Steam Store Search and Verification", () => {
                     "price"
                 );
 
+
+            
                 expect(game1.name)
                     .to.equal("Dota 2");
 
+
+             
                 expect(game2.name)
                     .to.be.a("string")
                     .and.not.be.empty;
 
+
+              
                 cy.log(`Game 1: ${JSON.stringify(game1)}`);
                 cy.log(`Game 2: ${JSON.stringify(game2)}`);
-
             });
-
     });
 
 
@@ -63,17 +84,19 @@ describe("Steam Store Search and Verification", () => {
 
         steamStore.searchGame("Dota 2");
 
+
+     
         steamStore.getFirstTwoGames()
             .then(({ game1, game2 }) => {
 
-                // Search again using second game's name
+
                 steamStore.searchGame(game2.name);
 
-                // Verify search box
+
                 steamStore.searchBox()
                     .should("have.value", game2.name);
 
-                // Verify both games exist
+
                 steamStore.findResultByName(game1.name)
                     .should("exist");
 
@@ -81,35 +104,34 @@ describe("Steam Store Search and Verification", () => {
                     .should("exist");
 
 
-                // Extract Game 1 again
+              
                 steamStore.getGameByName(game1.name)
                     .then((newGame1) => {
 
-                        // Extract Game 2 again
+
+                     
+                        expect(newGame1.name)
+                            .to.equal(game1.name);
+
+                        expect(newGame1.platforms)
+                            .to.deep.equal(game1.platforms);
+
+                        expect(newGame1.releaseDate)
+                            .to.equal(game1.releaseDate);
+
+                        expect(newGame1.review)
+                            .to.equal(game1.review);
+
+                        expect(newGame1.price)
+                            .to.equal(game1.price);
+
+
+                   
                         steamStore.getGameByName(game2.name)
                             .then((newGame2) => {
 
 
-                                // Compare Game 1
-
-                                expect(newGame1.name)
-                                    .to.equal(game1.name);
-
-                                expect(newGame1.platforms)
-                                    .to.deep.equal(game1.platforms);
-
-                                expect(newGame1.releaseDate)
-                                    .to.equal(game1.releaseDate);
-
-                                expect(newGame1.review)
-                                    .to.equal(game1.review);
-
-                                expect(newGame1.price)
-                                    .to.equal(game1.price);
-
-
-                                // Compare Game 2
-
+                               
                                 expect(newGame2.name)
                                     .to.equal(game2.name);
 
@@ -126,11 +148,8 @@ describe("Steam Store Search and Verification", () => {
                                     .to.equal(game2.price);
 
                             });
-
                     });
-
             });
-
     });
 
 });

@@ -1,14 +1,19 @@
 {
   "name": "misl-sqa-assignment",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Cypress SQA automation assignment for MISL",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "cy:open": "cypress open",
+    "cy:run": "cypress run"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "cypress",
+    "sqa",
+    "automation",
+    "misl"
+  ],
+  "author": "Marufa Akter Meem",
   "license": "ISC",
-  "description": "",
   "devDependencies": {
     "cypress": "^16.1.0"
   }
